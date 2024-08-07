@@ -3,24 +3,29 @@
 #include "freertos/semphr.h"
 #include "esp_system.h"
 #include "esp_freertos_hooks.h"
-#include "lvgl.h"
 #include "lvgl_helpers.h" 
+#include "ui.h"
+#include "nvs_flash.h"
+#include "esp_timer.h"
 
 #include "lvgl/demos/lv_demos.h"
  
 void lv_tick_task(void *arg);
 static void guiTask(void *pvParameter);
-void lvgl_test();
- 
-SemaphoreHandle_t xGuiSemaphore;
  
 static void guiTask(void *pvParameter)
 {
     (void) pvParameter;
-    xGuiSemaphore = xSemaphoreCreateMutex();
  
     lv_init();
     lvgl_driver_init();
+
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
  
     lv_color_t* buf1 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
     assert(buf1 != NULL);
@@ -41,26 +46,21 @@ static void guiTask(void *pvParameter)
     disp_drv.draw_buf = &disp_buf;
     lv_disp_drv_register(&disp_drv);
  
-    esp_register_freertos_tick_hook((void *)lv_tick_task);
+    const esp_timer_create_args_t periodic_timer_args = {
+        .callback = &lv_tick_task,
+        .name = "periodic_gui"};
+    esp_timer_handle_t periodic_timer;
+    ESP_ERROR_CHECK(esp_timer_create(&periodic_timer_args, &periodic_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(periodic_timer, 1 * 1000));
  
-    /* Create the demo application */
-    
-    lvgl_test();
+    ui_init();
  
     while (1)
     {
-        /* Delay 1 tick (assumes FreeRTOS tick is 10ms */
         vTaskDelay(pdMS_TO_TICKS(10));
- 
-        /* Try to take the semaphore, call lvgl related function on success */
-        if (pdTRUE == xSemaphoreTake(xGuiSemaphore, portMAX_DELAY))
-        {
-            lv_task_handler();
-            xSemaphoreGive(xGuiSemaphore);
-        }
+        lv_task_handler();
     }
  
-    /* A task should NEVER return */
     free(buf1);
     free(buf2);
     vTaskDelete(NULL);
@@ -75,25 +75,4 @@ void lv_tick_task(void *arg)
 {
     (void)arg;
     lv_tick_inc(portTICK_PERIOD_MS);
-}
-
-void lvgl_test(void)
-{
-    LV_FONT_DECLARE(siyuan_simple_20);
-
-    lv_obj_t *label1 = lv_label_create(lv_scr_act());
-    lv_label_set_long_mode(label1, LV_LABEL_LONG_WRAP); /*Break the long lines*/
-    lv_label_set_recolor(label1, true);                 /*Enable re-coloring by commands in the text*/
-    lv_obj_set_style_text_font(label1, &siyuan_simple_20,0);
-    lv_label_set_text(label1, "#0000ff 恭喜# #ff00ff 樊振东# 赢得比赛！");
-    lv_obj_set_width(label1, 120); /*Set smaller width to make the lines wrap*/
-    lv_obj_set_style_text_align(label1, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_align(label1, LV_ALIGN_CENTER, 0, -40);
-
-    lv_obj_t *label2 = lv_label_create(lv_scr_act());
-    lv_label_set_long_mode(label2, LV_LABEL_LONG_SCROLL_CIRCULAR); /*Circular scroll*/
-    lv_obj_set_width(label2, 120);
-    lv_obj_set_style_text_font(label2, &siyuan_simple_20,0);
-    lv_label_set_text(label2, "恭喜中国队打败小日子！");
-    lv_obj_align(label2, LV_ALIGN_CENTER, 0, 40);
 }

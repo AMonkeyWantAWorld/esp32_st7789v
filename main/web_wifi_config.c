@@ -91,6 +91,9 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        char ip[20];
+        sprintf(ip,"%d.%d.%d.%d",IP2STR(&event->ip_info.ip));
+        lv_display_text(-4, -74, LV_ALIGN_CENTER, ip);
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
@@ -203,13 +206,7 @@ bool wifi_init_sta(wifi_config_t *cfg)
 
 wifi_mode_t app_wifi_main(bool *station_connected)
 {
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
+    lv_display_text(-4, -74, LV_ALIGN_CENTER, "初始化wifi配置");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     wifi_mode_t mode = WIFI_MODE_NULL;
     wifi_config_t wifi_config;
@@ -233,11 +230,9 @@ wifi_mode_t app_wifi_main(bool *station_connected)
         ESP_LOGW(TAG, "Neither AP or STA have been configured. WiFi will be off.");
         return WIFI_MODE_NULL;
     }
-
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     s_wifi_event_group = xEventGroupCreate();
-
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     esp_wifi_set_storage(WIFI_STORAGE_FLASH);
 
@@ -252,6 +247,7 @@ wifi_mode_t app_wifi_main(bool *station_connected)
         NULL,
         NULL));
 
+    lv_display_text(-4, -74, LV_ALIGN_CENTER, "esp_wifi_set_mode(mode)");
     ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
 
     if (mode & WIFI_MODE_AP) {
@@ -261,26 +257,32 @@ wifi_mode_t app_wifi_main(bool *station_connected)
     }
 
     if (mode & WIFI_MODE_STA) {
+        lv_display_text(-4, -74, LV_ALIGN_CENTER, "开始链接网络");
         esp_netif_create_default_wifi_sta();
         wifi_init_sta(&wifi_config);
+        lv_display_text(-4, -74, LV_ALIGN_CENTER, "网络连接成功。");
     }
+    
+    vTaskDelay(100/portTICK_PERIOD_MS);
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
     ESP_LOGI(TAG, "wifi init finished.");
+    lv_display_text(-4, -74, LV_ALIGN_CENTER, "wifi init finished.");
 
-    if (mode & WIFI_MODE_STA) {
-        bits = xEventGroupWaitBits(s_wifi_event_group,
-            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-            pdFALSE,
-            pdFALSE,
-            portMAX_DELAY);
-    }
-    
-    vEventGroupDelete(s_wifi_event_group);
-    s_wifi_event_group = NULL;
-    if(bits & WIFI_CONNECTED_BIT) {
-        *station_connected = true;
-    }
+    // if (mode & WIFI_MODE_STA) {
+    //     bits = xEventGroupWaitBits(s_wifi_event_group,
+    //         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+    //         pdFALSE,
+    //         pdFALSE,
+    //         portMAX_DELAY);
+    // }
+    //  lv_display_text(-4, -74, LV_ALIGN_CENTER, "xEventGroupWaitBits");
+    // vEventGroupDelete(s_wifi_event_group);
+    // s_wifi_event_group = NULL;
+    // if(bits & WIFI_CONNECTED_BIT) {
+    //     *station_connected = true;
+    // }
+    // lv_display_text(-4, -74, LV_ALIGN_CENTER, "vEventGroupDelete");
 
     return mode;
 }

@@ -25,6 +25,7 @@
 #define _APP_WIFI_H_
 
 #include "esp_wifi.h"
+#include "ui_display_handler.h"
 
 #ifdef __cplusplus
 extern "C" {
