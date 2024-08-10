@@ -10,10 +10,10 @@ static bool s_sta_connected = false;
 
 void ui_Screen1_screen_init(void)
 {
+    _lv_refr_init();
     ui_Screen1 = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     
-    lv_display_text(-4, -74, LV_ALIGN_CENTER, "正在启动1，请稍候。。。");
     vTaskDelay(10/portTICK_PERIOD_MS);
     app_wifi_main(&s_sta_connected);
 }

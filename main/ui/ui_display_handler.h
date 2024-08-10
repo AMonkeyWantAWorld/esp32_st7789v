@@ -16,10 +16,12 @@ extern "C" {
 #include "ui_events.h"
 
 // SCREEN: ui_Screen1
-void lv_display_text(int x, int y, lv_align_t alignments,char *text);
-void lv_display_spinner(int x, int y, lv_align_t alignments, char *text);
+void lv_display_text(lv_obj_t *ui_Label1,lv_obj_t *ui_Screen1,int x, int y, lv_align_t alignments,char *text);
+void display_text(lv_obj_t *label, int x, int y, lv_align_t alignments, char *text);
+void lv_display_spinner(int x, int y, int width, int height,lv_obj_flag_t flag);
 void lv_display_init(void);
 void lv_deisplay_text_update(void);
+void lv_flush_full_screen(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

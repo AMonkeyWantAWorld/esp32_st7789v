@@ -5,33 +5,78 @@
 
 #include "ui.h"
 #include "ui_helpers.h"
+#include "esp_log.h"
 
 void lv_display_init(void){
 
 }
 
-void lv_display_text(int x, int y, lv_align_t alignments, char *text)
-{
+void display_text(lv_obj_t *label, int x, int y, lv_align_t alignments, char *text){
     LV_FONT_DECLARE(siyuan_simple_20);
-    if(ui_Label1 == NULL){
-        ui_Label1 = lv_label_create(ui_Screen1);
-    }
-    lv_obj_set_width(ui_Label1, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Label1, x);
-    lv_obj_set_y(ui_Label1, y);
-    lv_obj_set_align(ui_Label1, alignments);
-    lv_obj_set_style_text_font(ui_Label1, &siyuan_simple_20,0);
-    lv_label_set_text(ui_Label1, text);
+    lv_obj_set_width(label, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(label, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(label, x);
+    lv_obj_set_y(label, y);
+    lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(label, 250);
+    lv_obj_set_style_anim_speed(label, 5,_LV_STYLE_STATE_CMP_SAME);
+    lv_obj_set_align(label, alignments);
+    lv_obj_set_style_text_font(label, &siyuan_simple_20,0);
+    lv_label_set_text(label, text);
 }
 
-void lv_display_spinner(int x, int y, int width, int height)
+void lv_display_text(int labelIndex,lv_obj_t *screen, int x, int y, lv_align_t alignments, char *text)
 {
-    ui_Spinner1 = lv_spinner_create(ui_Screen1, 1000, 90);
+    switch (labelIndex)
+    {
+    case 1:
+        if(ui_Label1 == NULL){
+            ui_Label1 = lv_label_create(screen);   
+        }
+        display_text(ui_Label1,x,y,alignments,text);
+        break;
+    case 2:
+        if(ui_Label2 == NULL){
+            ui_Label2 = lv_label_create(screen);
+        }
+        display_text(ui_Label2,x,y,alignments,text);
+        break;
+    case 3:
+        if(ui_Label3 == NULL){
+            ui_Label3 = lv_label_create(screen);
+        }
+        display_text(ui_Label3,x,y,alignments,text);
+        break;
+    case 4:
+        if(ui_Label4 == NULL){
+            ui_Label4 = lv_label_create(screen);
+        }
+        display_text(ui_Label4,x,y,alignments,text);
+        break;
+    
+    default:
+        break;
+    }
+}
+
+void lv_flush_full_screen(void){
+    lv_refr_now(NULL);
+}
+
+void lv_display_spinner(int x, int y, int width, int height,lv_obj_flag_t flag)
+{
+    if(ui_Spinner1 == NULL){
+        ui_Spinner1 = lv_spinner_create(ui_Screen1, 10000, 90);
+    }
     lv_obj_set_width(ui_Spinner1, width);
     lv_obj_set_height(ui_Spinner1, height);
     lv_obj_set_x(ui_Spinner1, x);
     lv_obj_set_y(ui_Spinner1, y);
     lv_obj_set_align(ui_Spinner1, LV_ALIGN_CENTER);
-    lv_obj_clear_flag(ui_Spinner1, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    if(LV_OBJ_FLAG_HIDDEN == flag){
+        lv_obj_add_flag(ui_Spinner1,flag);
+        lv_flush_full_screen();
+    } else if (LV_OBJ_FLAG_CLICKABLE == flag){
+        lv_obj_clear_flag(ui_Spinner1, flag);      /// Flags
+    }
 }

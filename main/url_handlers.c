@@ -256,6 +256,8 @@ void create_a_restart_timer(void)
 //通过http获取到的网络ssid和password
 esp_err_t wifi_config_post_handler(httpd_req_t* req)
 {
+    lv_display_spinner(-4, 0, 50, 50, LV_OBJ_FLAG_HIDDEN);
+    lv_display_text(2, ui_Screen1,-4, 0, LV_ALIGN_CENTER, "获取wifi帐号和密码。。。");
     ESP_LOGD(TAG, "in / post handler");
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config_t));
@@ -287,6 +289,8 @@ esp_err_t wifi_config_post_handler(httpd_req_t* req)
     if(!wifi_config_store(&wifi_config)) {
         return ESP_FAIL;
     }
+    lv_display_text(2, ui_Screen1,-4, 0, LV_ALIGN_CENTER, "3秒后即将重启连接wifi。。。");
+    vTaskDelay(3000/portTICK_PERIOD_MS);
     esp_restart();
 
     return ESP_OK;

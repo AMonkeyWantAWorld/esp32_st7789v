@@ -17,6 +17,20 @@
         "esp_event.h": "c",
         "freertos.h": "c",
         "cstdlib": "c",
-        "format": "c"
+        "format": "c",
+        "cstdio": "c",
+        "wifi_sta_ap.h": "c",
+        "url_handlers.h": "c",
+        "sstream": "c",
+        "charconv": "c",
+        "chrono": "c",
+        "optional": "c",
+        "ratio": "c",
+        "system_error": "c",
+        "array": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c"
     }
 }

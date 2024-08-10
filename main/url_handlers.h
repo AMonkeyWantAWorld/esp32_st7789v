@@ -22,6 +22,7 @@
 #include "cJSON.h"
 #include "web_wifi_config.h"
 #include "sdkconfig.h"
+#include "ui_display_handler.h"
 
 #include <esp_http_server.h>
 

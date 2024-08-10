@@ -91,9 +91,11 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        char ip[20];
-        sprintf(ip,"%d.%d.%d.%d",IP2STR(&event->ip_info.ip));
-        lv_display_text(-4, -74, LV_ALIGN_CENTER, ip);
+        lv_display_spinner(-4, 0, 50, 50, LV_OBJ_FLAG_HIDDEN);
+        char ip[40];
+        sprintf(ip,"获取到的IP为：%d.%d.%d.%d",IP2STR(&event->ip_info.ip));
+        lv_display_text(2, ui_Screen1, -4, 0, LV_ALIGN_CENTER, ip);
+        lv_display_text(1, ui_Screen1,-4, -74, LV_ALIGN_CENTER, "网络连接成功。");
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
@@ -141,7 +143,14 @@ bool wifi_config_load_from_partition(const char* namespace, wifi_config_t *cfg)
     nvs_handle_t handle;
     size_t size;
 
-    esp_err_t err_t = nvs_open(namespace, NVS_READONLY, &handle);
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    esp_err_t err_t = nvs_open(namespace, NVS_READWRITE, &handle);
 
     if ( err_t != ESP_OK) {
         ESP_ERROR_CHECK(err_t);
@@ -206,7 +215,6 @@ bool wifi_init_sta(wifi_config_t *cfg)
 
 wifi_mode_t app_wifi_main(bool *station_connected)
 {
-    lv_display_text(-4, -74, LV_ALIGN_CENTER, "初始化wifi配置");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     wifi_mode_t mode = WIFI_MODE_NULL;
     wifi_config_t wifi_config;
@@ -247,42 +255,28 @@ wifi_mode_t app_wifi_main(bool *station_connected)
         NULL,
         NULL));
 
-    lv_display_text(-4, -74, LV_ALIGN_CENTER, "esp_wifi_set_mode(mode)");
     ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
 
     if (mode & WIFI_MODE_AP) {
+        lv_display_text(1, ui_Screen1,-4, -74, LV_ALIGN_CENTER, "开始初始化AP");
         wifi_init_softAp();
         ESP_ERROR_CHECK(init_fs());
         start_webserver();
+        lv_display_text(1, ui_Screen1,-4, -74, LV_ALIGN_CENTER, "请连接fly_pig网络，访问192.168.4.1配置无线网信息（只支持2.4G）");
+        lv_display_spinner(-4, 0, 50, 50, LV_OBJ_FLAG_CLICKABLE);
     }
 
     if (mode & WIFI_MODE_STA) {
-        lv_display_text(-4, -74, LV_ALIGN_CENTER, "开始链接网络");
         esp_netif_create_default_wifi_sta();
         wifi_init_sta(&wifi_config);
-        lv_display_text(-4, -74, LV_ALIGN_CENTER, "网络连接成功。");
+        lv_display_text(1, ui_Screen1,-4, -74, LV_ALIGN_CENTER, "正在连接网络。。。");
+        lv_display_spinner(-4, 0, 50, 50, LV_OBJ_FLAG_CLICKABLE);
     }
     
     vTaskDelay(100/portTICK_PERIOD_MS);
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
     ESP_LOGI(TAG, "wifi init finished.");
-    lv_display_text(-4, -74, LV_ALIGN_CENTER, "wifi init finished.");
-
-    // if (mode & WIFI_MODE_STA) {
-    //     bits = xEventGroupWaitBits(s_wifi_event_group,
-    //         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-    //         pdFALSE,
-    //         pdFALSE,
-    //         portMAX_DELAY);
-    // }
-    //  lv_display_text(-4, -74, LV_ALIGN_CENTER, "xEventGroupWaitBits");
-    // vEventGroupDelete(s_wifi_event_group);
-    // s_wifi_event_group = NULL;
-    // if(bits & WIFI_CONNECTED_BIT) {
-    //     *station_connected = true;
-    // }
-    // lv_display_text(-4, -74, LV_ALIGN_CENTER, "vEventGroupDelete");
 
     return mode;
 }
