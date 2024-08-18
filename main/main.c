@@ -7,8 +7,6 @@
 #include "ui.h"
 #include "nvs_flash.h"
 #include "esp_timer.h"
-
-#include "lvgl/demos/lv_demos.h"
  
 void lv_tick_task(void *arg);
 static void guiTask(void *pvParameter);
