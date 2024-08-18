@@ -1,4 +1,3 @@
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_mac.h"
@@ -114,7 +113,7 @@ void DS1302_halt(DS1302_Dev *dev, bool halt)
 bool DS1302_isHalted(DS1302_Dev *dev)
 {
     uint8_t val = DS1302_readClockRegister(dev, DS1302_REG_SECONDS);
-ESP_LOGD(TAG,"DS1302_REG_SECONDS=%02x",val);
+    ESP_LOGD(TAG,"DS1302_REG_SECONDS=%02x",val);
     if (DS1302_readClockRegister(dev, DS1302_REG_SECONDS) & (1 << DS1302_BIT_CH)) {
         return true;
     } else {
@@ -182,13 +181,6 @@ bool DS1302_getDateTime(DS1302_Dev *dev, DS1302_DateTime *dateTime)
         (dateTime->dayWeek < 1) || (dateTime->dayWeek > 7) ||
         (dateTime->year > 2099))
     {
-        ESP_LOGW(TAG, "dateTime->second=%d",dateTime->second);
-        ESP_LOGW(TAG, "dateTime->minute=%d",dateTime->minute);
-        ESP_LOGW(TAG, "dateTime->hour=%d",dateTime->hour);
-        ESP_LOGW(TAG, "dateTime->dayMonth=%d",dateTime->dayMonth);
-        ESP_LOGW(TAG, "dateTime->month=%d",dateTime->month);
-        ESP_LOGW(TAG, "dateTime->dayWeek=%d",dateTime->dayWeek);
-        ESP_LOGW(TAG, "dateTime->year=%d",dateTime->year);
         memset(dateTime, 0x00, sizeof(DS1302_DateTime));
         return false;
     }

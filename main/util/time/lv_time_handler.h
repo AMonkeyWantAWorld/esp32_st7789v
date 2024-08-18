@@ -17,10 +17,11 @@
 
 #define NTP_SERVER "pool.ntp.org"
 
-void initialize_sntp();
-void set_clock(void *pvParameters);
+void initialize_time();
+void set_clock_sntp(struct timeval *tv);
 void get_clock(DS1302_DateTime *dt);
-void diff_clock(void *pvParameters);
-bool obtain_time(void);
+void clock_init(void *pvParameters);
+void dtime_to_timeval(DS1302_DateTime *ds1302_time, struct timeval *tv);
+void set_clock_rtc(void *paramerts);
 
 #endif

@@ -94,8 +94,7 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         char ip[40];
         sprintf(ip,"获取到的IP为：%d.%d.%d.%d",IP2STR(&event->ip_info.ip));
-        lv_display_text(set_display_font(ui_SysState, 0, 75, LV_LABEL_LONG_WRAP, LV_ALIGN_CENTER, "网络连接成功，即将跳转。"));
-        set_clock(NULL);
+        lv_display_text(set_display_font(ui_SysState, 0, 75, LV_LABEL_LONG_WRAP, LV_ALIGN_CENTER, "网络连接成功"));
         _ui_screen_change(&ui_Clock, LV_SCR_LOAD_ANIM_FADE_ON, 200, 14000, &ui_Clock_screen_init);
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);

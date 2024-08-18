@@ -34,8 +34,8 @@ void ui_Weather_screen_init(void)
     lv_img_set_src(ui_Cloud, &ui_img_cloud_png);
     lv_obj_set_width(ui_Cloud, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Cloud, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_Cloud, -2);
-    lv_obj_set_y(ui_Cloud, 19);
+    lv_obj_set_x(ui_Cloud, -5);
+    lv_obj_set_y(ui_Cloud, 62);
     lv_obj_set_align(ui_Cloud, LV_ALIGN_TOP_MID);
     lv_obj_add_flag(ui_Cloud, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_Cloud, LV_OBJ_FLAG_SCROLLABLE);      /// Flags

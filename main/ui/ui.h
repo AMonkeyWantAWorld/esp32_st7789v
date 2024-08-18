@@ -18,10 +18,7 @@ extern "C" {
 #include "ui_events.h"
 
 void upanim_Animation(lv_obj_t * TargetObject, int delay);
-void hour_Animation(lv_obj_t * TargetObject, int delay);
-void min_Animation(lv_obj_t * TargetObject, int delay);
-void sec_Animation(lv_obj_t * TargetObject, int delay, int sec);
-void scrolldot_Animation(lv_obj_t * TargetObject, int delay);
+
 // SCREEN: ui_Splash
 void ui_Splash_screen_init(void);
 void ui_event_Splash(lv_event_t * e);
@@ -134,9 +131,6 @@ LV_IMG_DECLARE(ui_img_cloud_png);    // assets/cloud.png
 LV_IMG_DECLARE(ui_img_weather_1_png);    // assets/weather_1.png
 LV_IMG_DECLARE(ui_img_weather_2_png);    // assets/weather_2.png
 LV_IMG_DECLARE(ui_img_weather_3_png);    // assets/weather_3.png
-
-
-
 
 void ui_init(void);
 

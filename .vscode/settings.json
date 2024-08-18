@@ -40,6 +40,14 @@
         "ds1302.h": "c",
         "gpio.h": "c",
         "cstring": "c",
-        "lv_time_handler.h": "c"
+        "lv_time_handler.h": "c",
+        "*.tcc": "c",
+        "future": "c",
+        "limits": "c",
+        "ctime": "c",
+        "iomanip": "c",
+        "numeric": "c",
+        "streambuf": "c",
+        "*.inc": "c"
     }
 }

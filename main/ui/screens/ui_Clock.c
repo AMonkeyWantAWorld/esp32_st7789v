@@ -5,6 +5,10 @@
 
 #include "../ui.h"
 
+void send_event(void *parameter){
+    lv_event_send(ui_Clock, LV_EVENT_REFRESH, NULL);
+}
+
 void ui_Clock_screen_init(void)
 {
     ui_Clock = lv_obj_create(NULL);
@@ -122,4 +126,7 @@ void ui_Clock_screen_init(void)
     lv_obj_set_style_border_width(ui_Clock_Center, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_Clock, ui_event_Clock, LV_EVENT_ALL, NULL);
+
+    lv_timer_create((void *)send_event, 1000,NULL);
+
 }
