@@ -208,12 +208,12 @@ void ui_event_Clock(lv_event_t * e)
         int sec = time_temp.tm_sec * 60;
 
         hour = hour * 300;
-        hour += (time_temp.tm_min / 12.0) * 100;
+        hour += (time_temp.tm_min / 12.0) * 60;
 
         lv_img_set_angle(ui_Hour, hour);
         lv_img_set_angle(ui_Sec, sec);
         lv_img_set_angle(ui_Min, min);
-        // ESP_LOGI("time","current tim is %d-%02d-%02d", hour,min,sec);
+        ESP_LOGI("time","current tim is %d-%02d-%02d", hour,min,sec);
     }
     
 }
