@@ -48,6 +48,16 @@
         "iomanip": "c",
         "numeric": "c",
         "streambuf": "c",
-        "*.inc": "c"
+        "*.inc": "c",
+        "ui_comp_hook.h": "c",
+        "esp_vfs_fat.h": "c",
+        "nvs_flash.h": "c",
+        "timers.h": "c",
+        "string": "c",
+        "string_view": "c",
+        "span": "c",
+        "esp_http_client.h": "c",
+        "esp_tls.h": "c",
+        "esp_tls_errors.h": "c"
     }
 }

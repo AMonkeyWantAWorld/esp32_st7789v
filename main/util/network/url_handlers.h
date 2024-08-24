@@ -23,6 +23,8 @@
 #include "web_wifi_config.h"
 #include "sdkconfig.h"
 #include "ui_display_handler.h"
+#include "esp_http_client.h"
+#include "esp_tls.h"
 
 #include <esp_http_server.h>
 
@@ -33,6 +35,9 @@ extern "C" {
 #define NUM_OUTPUTS  4
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (10240)
+
+#define MAX_HTTP_RECV_BUFFER 512
+#define MAX_HTTP_OUTPUT_BUFFER 2048
 
 //宏定义条件判断，如果不满足则打印并跳转至goto_tag处
 #define REST_CHECK(a, str, goto_tag, ...)                                              \
@@ -58,6 +63,7 @@ static const char web_base_point[] = "/www";
 
 esp_err_t start_webserver(void);
 esp_err_t init_fs(void);
+void http_get_task(const char *url);
 
 #ifdef __cplusplus
 }

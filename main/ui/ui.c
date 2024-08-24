@@ -7,12 +7,19 @@
 #include "ui_helpers.h"
 #include "web_wifi_config.h"
 #include "lv_time_handler.h"
+#include "url_handlers.h"
+
+/* 获取一天预报的请求 */
+#define GET_DAILY_WEATHER "https://api.seniverse.com/v3/weather/daily.json?key=STLZA1j8w6ilr1Wq-&location=beijing&language=zh-Hans&unit=c&start=0&days=1"
+/* 获取当天预报的请求 */
+#define GET_NOW_WEATHER "https://api.seniverse.com/v3/weather/now.json?key=STLZA1j8w6ilr1Wq-&location=beijing&language=zh-Hans&unit=c"
+
 
 ///////////////////// VARIABLES ////////////////////
 void upanim_Animation(lv_obj_t * TargetObject, int delay);
 
 static bool s_sta_connected = false;
-DS1302_DateTime dt;
+
 static time_t timep;
 static struct tm time_temp;
     
@@ -98,17 +105,31 @@ lv_obj_t * ui_Forward;
 void ui_Weather_screen_init(void);
 void ui_event_Weather(lv_event_t * e);
 lv_obj_t * ui_Weather;
-lv_obj_t * ui_Pary_Cloud;
 lv_obj_t * ui_New_York;
-lv_obj_t * ui_Cloud;
+lv_obj_t * ui_Image1;
 lv_obj_t * ui_Celsius;
 lv_obj_t * ui_Weather_Icons;
-lv_obj_t * ui_w1;
-lv_obj_t * ui_w2;
-lv_obj_t * ui_w3;
+lv_obj_t * ui_Image2;
+lv_obj_t * ui_Image3;
+lv_obj_t * ui_Image4;
 lv_obj_t * ui_W1_Num;
+lv_obj_t * ui_Image6;
+lv_obj_t * ui_Image5;
 lv_obj_t * ui_W2_Num;
 lv_obj_t * ui_W3_Num;
+lv_obj_t * ui_W3_Num1;
+lv_obj_t * ui_W3_Num2;
+lv_obj_t * ui_Panel1;
+lv_obj_t * ui_hour;
+lv_obj_t * ui_min;
+lv_obj_t * ui_split;
+lv_obj_t * ui_yearsplit;
+lv_obj_t * ui_year;
+lv_obj_t * ui_split1;
+lv_obj_t * ui_sec;
+lv_obj_t * ui_month;
+lv_obj_t * ui_day;
+lv_obj_t * ui_yearsplit1;
 
 
 // SCREEN: ui_Alarm
@@ -213,7 +234,7 @@ void ui_event_Clock(lv_event_t * e)
         lv_img_set_angle(ui_Hour, hour);
         lv_img_set_angle(ui_Sec, sec);
         lv_img_set_angle(ui_Min, min);
-        ESP_LOGI("time","current tim is %d-%02d-%02d", hour,min,sec);
+        // ESP_LOGI("time","current tim is %d-%02d-%02d", hour,min,sec);
     }
     
 }
@@ -262,11 +283,7 @@ void ui_event_Weather(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_SCREEN_LOADED) {
-        upanim_Animation(ui_Cloud, 100);
-        upanim_Animation(ui_Pary_Cloud, 200);
-        upanim_Animation(ui_Celsius, 300);
-        upanim_Animation(ui_New_York, 400);
-        upanim_Animation(ui_Weather_Icons, 300);
+        http_get_task(GET_DAILY_WEATHER);
     }
 }
 void ui_event_Alarm(lv_event_t * e)

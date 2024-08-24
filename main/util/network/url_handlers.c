@@ -1,3 +1,10 @@
+/*
+ * @Author: Taburiss
+ * @Date: 2024-08-03 16:36:51
+ * @LastEditTime: 2024-08-24 12:26:06
+ * @FilePath: /esp32_st7789v/main/util/network/url_handlers.c
+ * @Description: esp32配网文件
+ */
 #include "url_handlers.h"
 
 //网页参数
@@ -5,6 +12,9 @@ const char* PARAM_INPUT_1 = "ssid";
 const char* PARAM_INPUT_2 = "pass";
 const char* PARAM_INPUT_3 = "ip";
 const char* TAG = "simple_server";
+
+extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
+extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
 
 //字符转int
 int httpdHexVal(char c)
@@ -347,7 +357,11 @@ esp_err_t ota_html_get_handler(httpd_req_t* req)
     return ESP_OK;
 }
 
-//重启页面获取
+/**
+ * 方法描述：重启esp32的请求页面
+ * 作者:Taburiss
+ * 创建时间:2024/08/24 11:53
+*/
 esp_err_t reboot_html_get_handler(httpd_req_t* req)
 {
     char filepath[FILE_PATH_MAX];
@@ -367,7 +381,11 @@ esp_err_t reboot_html_get_handler(httpd_req_t* req)
 
 static bool s_sta_connected = false;
 
-//开启web服务
+/**
+ * 方法描述：开启web服务
+ * 作者:Taburiss
+ * 创建时间:2024/08/24 11:52
+*/
 esp_err_t start_webserver(void)
 {
     rest_server_context_t* rest_context = calloc(1, sizeof(rest_server_context_t));
@@ -420,4 +438,128 @@ err_start:
     free(rest_context);
 err:
     return ESP_FAIL;
+}
+
+/**
+ * 方法描述：http访问回调函数，处理各个事件的方法
+ * 作者:Taburiss
+ * 创建时间:2024/08/24 11:53
+*/
+esp_err_t _http_event_handler(esp_http_client_event_t *evt)
+{
+    /* response数据的缓冲区 */
+    static char *output_buffer; 
+    /* response数据的长度，即读取到bytes长度*/
+    static int output_len;      
+    switch(evt->event_id) {
+        case HTTP_EVENT_ERROR:
+            ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
+            break;
+        case HTTP_EVENT_ON_CONNECTED:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
+            break;
+        case HTTP_EVENT_HEADER_SENT:
+            ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
+            break;
+        case HTTP_EVENT_ON_HEADER:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
+            break;
+        case HTTP_EVENT_ON_DATA:
+            ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
+            // Clean the buffer in case of a new request
+            if (output_len == 0 && evt->user_data) {
+                // we are just starting to copy the output data into the use
+                memset(evt->user_data, 0, MAX_HTTP_OUTPUT_BUFFER);
+            }
+            /*
+             *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
+             *  However, event handler can also be used in case chunked encoding is used.
+             */
+            if (!esp_http_client_is_chunked_response(evt->client)) {
+                // If user_data buffer is configured, copy the response into the buffer
+                int copy_len = 0;
+                if (evt->user_data) {
+                    // The last byte in evt->user_data is kept for the NULL character in case of out-of-bound access.
+                    copy_len = MIN(evt->data_len, (MAX_HTTP_OUTPUT_BUFFER - output_len));
+                    if (copy_len) {
+                        memcpy(evt->user_data + output_len, evt->data, copy_len);
+                    }
+                } else {
+                    int content_len = esp_http_client_get_content_length(evt->client);
+                    if (output_buffer == NULL) {
+                        // We initialize output_buffer with 0 because it is used by strlen() and similar functions therefore should be null terminated.
+                        output_buffer = (char *) calloc(content_len + 1, sizeof(char));
+                        output_len = 0;
+                        if (output_buffer == NULL) {
+                            ESP_LOGE(TAG, "Failed to allocate memory for output buffer");
+                            return ESP_FAIL;
+                        }
+                    }
+                    copy_len = MIN(evt->data_len, (content_len - output_len));
+                    if (copy_len) {
+                        memcpy(output_buffer + output_len, evt->data, copy_len);
+                    }
+                    ESP_LOGI(TAG, "Response is %s", output_buffer);
+                }
+                output_len += copy_len;
+            }
+
+            break;
+        case HTTP_EVENT_ON_FINISH:
+            ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
+            if (output_buffer != NULL) {
+                free(output_buffer);
+                output_buffer = NULL;
+            }
+            output_len = 0;
+            break;
+        case HTTP_EVENT_DISCONNECTED:
+            ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+            int mbedtls_err = 0;
+            esp_err_t err = esp_tls_get_and_clear_last_error((esp_tls_error_handle_t)evt->data, &mbedtls_err, NULL);
+            if (err != 0) {
+                ESP_LOGI(TAG, "Last esp error code: 0x%x", err);
+                ESP_LOGI(TAG, "Last mbedtls failure: 0x%x", mbedtls_err);
+            }
+            if (output_buffer != NULL) {
+                free(output_buffer);
+                output_buffer = NULL;
+            }
+            output_len = 0;
+            break;
+        case HTTP_EVENT_REDIRECT:
+            ESP_LOGD(TAG, "HTTP_EVENT_REDIRECT");
+            esp_http_client_set_header(evt->client, "From", "user@example.com");
+            esp_http_client_set_header(evt->client, "Accept", "text/html");
+            esp_http_client_set_redirection(evt->client);
+            break;
+    }
+    return ESP_OK;
+}
+
+/**
+ * 方法描述：http或https请求，已经关闭tls验证
+ * 作者：Taburiss
+ * 创建时间：2024/08/24 11:55
+*/
+void http_get_task(const char *url)
+{
+    esp_http_client_config_t config = {
+        .url = url,
+        .event_handler = _http_event_handler,
+        // .user_data = url,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    /* 发起get请求 */
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTP GET Status = %d",
+                esp_http_client_get_status_code(client));
+    } else {
+        ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+    }
+    /* 释放资源 */
+    esp_http_client_cleanup(client);
+    vTaskDelete(NULL);
 }

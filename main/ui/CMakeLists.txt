@@ -28,6 +28,12 @@ SET(SOURCES components/ui_comp_alarm_comp.c
     images/ui_img_cloud_png.c
     images/ui_img_weather_1_png.c
     images/ui_img_weather_2_png.c
-    images/ui_img_weather_3_png.c)
+    images/ui_img_weather_3_png.c
+    images/ui_img_tq_03duoyun_png.c
+    images/ui_img_556198778.c
+    images/ui_img_277457461.c
+    images/ui_img_745566655.c
+    images/ui_img_845915064.c
+    images/ui_img_341460266.c)
 
 add_library(ui ${SOURCES})

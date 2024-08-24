@@ -91,17 +91,31 @@ extern lv_obj_t * ui_Forward;
 void ui_Weather_screen_init(void);
 void ui_event_Weather(lv_event_t * e);
 extern lv_obj_t * ui_Weather;
-extern lv_obj_t * ui_Pary_Cloud;
 extern lv_obj_t * ui_New_York;
-extern lv_obj_t * ui_Cloud;
+extern lv_obj_t * ui_Image1;
 extern lv_obj_t * ui_Celsius;
 extern lv_obj_t * ui_Weather_Icons;
-extern lv_obj_t * ui_w1;
-extern lv_obj_t * ui_w2;
-extern lv_obj_t * ui_w3;
+extern lv_obj_t * ui_Image2;
+extern lv_obj_t * ui_Image3;
+extern lv_obj_t * ui_Image4;
 extern lv_obj_t * ui_W1_Num;
+extern lv_obj_t * ui_Image6;
+extern lv_obj_t * ui_Image5;
 extern lv_obj_t * ui_W2_Num;
 extern lv_obj_t * ui_W3_Num;
+extern lv_obj_t * ui_W3_Num1;
+extern lv_obj_t * ui_W3_Num2;
+extern lv_obj_t * ui_Panel1;
+extern lv_obj_t * ui_hour;
+extern lv_obj_t * ui_split;
+extern lv_obj_t * ui_yearsplit;
+extern lv_obj_t * ui_year;
+extern lv_obj_t * ui_split1;
+extern lv_obj_t * ui_sec;
+extern lv_obj_t * ui_month;
+extern lv_obj_t * ui_day;
+extern lv_obj_t * ui_yearsplit1;
+extern lv_obj_t * ui_min;
 // SCREEN: ui_Alarm
 void ui_Alarm_screen_init(void);
 void ui_event_Alarm(lv_event_t * e);
@@ -131,6 +145,14 @@ LV_IMG_DECLARE(ui_img_cloud_png);    // assets/cloud.png
 LV_IMG_DECLARE(ui_img_weather_1_png);    // assets/weather_1.png
 LV_IMG_DECLARE(ui_img_weather_2_png);    // assets/weather_2.png
 LV_IMG_DECLARE(ui_img_weather_3_png);    // assets/weather_3.png
+LV_IMG_DECLARE(ui_img_pattern_png);    // assets/pattern.png
+LV_IMG_DECLARE(ui_img_tq_03duoyun_png);    // assets/tq_03duoyun.png
+LV_IMG_DECLARE(ui_img_556198778);    // assets/湿的.png
+LV_IMG_DECLARE(ui_img_277457461);    // assets/风(1).png
+LV_IMG_DECLARE(ui_img_745566655);    // assets/大气湿度.png
+LV_IMG_DECLARE(ui_img_845915064);    // assets/低温.png
+LV_IMG_DECLARE(ui_img_341460266);    // assets/高温.png
+LV_FONT_DECLARE(ui_font_Number);
 
 void ui_init(void);
 
